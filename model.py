@@ -1,6 +1,6 @@
 from config import config
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Dense, GRU, LSTM, TimeDistributed
+from tensorflow.keras.layers import Input, Dense, GRU, LSTM, TimeDistributed, Dropout
 from tensorflow.keras import Model
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras import backend as K
@@ -55,12 +55,39 @@ def my_sparse_categorical_accuracy(y_true, y_pred):
 
 def get_model():
     model_in = Input(shape=(config['sequence_length'], 64))
-    x = GRU(64, return_sequences=True, stateful=False)(model_in)
-    x = GRU(32, return_sequences=True, stateful=False)(x)
-    x = Dense(100, activation='tanh')(x)
+    x = LSTM(64, return_sequences=True, stateful=False)(model_in)
+    x = LSTM(32, return_sequences=True, stateful=False)(x)
+    #x = Dropout(0.1)(x)
+    #x = GRU(16, return_sequences=True, stateful=False)(x)
+    x = Dense(100, activation='relu')(x)
+    #x = Dropout(0.3)(x)
+    #x = Dense(128, activation='tanh')(x)
+    #x = Dense(64, activation='tanh')(x)
+    x = Dense(16, activation='relu')(x)
     pred = Dense(3, activation='softmax')(x)
     model = Model(inputs=model_in, outputs=pred)
-    model.compile(loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy'], optimizer=tf.keras.optimizers.Adam(lr=config['learning_rate'], decay=1e-4))
+    model.compile(loss=my_sparse_categorical_crossentropy, metrics=[my_sparse_categorical_accuracy], optimizer=tf.keras.optimizers.Adam(lr=config['learning_rate'], decay=1e-4))
     model.summary()
     plot_model(model, to_file=f'model-{config["sequence_length"]}.png', show_shapes=True, show_layer_names=True)
     return model
+
+def get_streaming_model(weights=None):
+    model_in = Input(batch_shape=(1, None, 64))
+    x = LSTM(64, return_sequences=True, stateful=True)(model_in)
+    x = LSTM(32, return_sequences=True, stateful=True)(x)
+    #x = Dropout(0.1)(x)
+    #x = GRU(16, return_sequences=True, stateful=False)(x)
+    x = Dense(100, activation='relu')(x)
+    #x = Dropout(0.3)(x)
+    #x = Dense(128, activation='tanh')(x)
+    #x = Dense(64, activation='tanh')(x)
+    x = Dense(16, activation='relu')(x)
+    pred = Dense(3, activation='softmax')(x)
+    model = Model(inputs=model_in, outputs=pred)
+    model.compile(loss=my_sparse_categorical_crossentropy, metrics=[my_sparse_categorical_accuracy], optimizer=tf.keras.optimizers.Adam(lr=config['learning_rate'], decay=1e-4))
+    model.summary()
+    if weights is not None:
+        model.load_weights(weights)
+    plot_model(model, to_file=f'streaming-model-{config["sequence_length"]}.png', show_shapes=True, show_layer_names=True)
+    return model
+

@@ -19,7 +19,7 @@ def generate_features(valid=0.2):
         for i, lang in enumerate(langs):
             print(f'start process {lang[6:]}')
             files = os.listdir(os.path.join(config['data_path'], lang))
-            for f in tqdm(files):
+            for f in tqdm(sorted(files)):
                 #print(f)
                 y, sr = librosa.load(os.path.join(config['data_path'], lang, f), sr=16000)
                 #print(y.shape)
@@ -61,17 +61,21 @@ def generate_features(valid=0.2):
             #break
             #X[i] = X[i].reshape((-1, config['sequence_length'], 64))
             print(features[i].shape)
-            with h5py.File(config['dataset_feature'], 'w') as hf:
-                for i in range(3):
-                    hf.create_dataset(f'features[{i}]', data=features[i])
-                    hf.create_dataset(f'labels[{i}]', data=labels[i])
+        with h5py.File(config['dataset_feature'], 'w') as hf:
+            for i in range(3):
+                hf.create_dataset(f'features[{i}]', data=features[i])
+                hf.create_dataset(f'labels[{i}]', data=labels[i])
     else:
         print('loading features...')
+        np.random.seed(976)
         with h5py.File(config['dataset_feature'], 'r') as hf:
             for i in range(3):
                 print(f'features[{i}]...')
                 features[i] = hf[f'features[{i}]'][:]
                 labels[i] = hf[f'labels[{i}]'][:]
+                perm = np.random.permutation(features[i].shape[0])
+                features[i] = features[i][perm]
+                labels[i] = labels[i][perm]
 #                 rows = X[i].shape[0]
 #                 rows = int(np.floor(rows / config['sequence_length'])) * config['sequence_length']
 #                 print(X[i][:rows].shape)
@@ -123,7 +127,6 @@ def generate_original_features(valid=0.2):
             for i in range(3):
                 hf.create_dataset(f'features[{i}]', data=features[i])
                 hf.create_dataset(f'labels[{i}]', data=labels[i])
-        return
     else:
         print('loading features...')
         with h5py.File(config['dataset_original_feature'], 'r') as hf:
@@ -162,6 +165,11 @@ def generate_balanced_data(valid=0.2):
             print(f'features[{i}]...')
             features[i] = hf[f'features[{i}]'][:]
             labels[i] = hf[f'labels[{i}]'][:]
+    np.random.seed(976)
+    for i in range(3):
+        perm = np.random.permutation(features[i].shape[0])
+        features[i] = features[i][perm]
+        labels[i] = labels[i][perm]
     length = min(features[0].shape[0], features[1].shape[0], features[2].shape[0])
     print(length)
     X_train = np.concatenate((features[0][:int((1 - valid) * length)], features[1][:int((1 - valid) * length)], features[2][:int((1 - valid) * length)]), axis=0)

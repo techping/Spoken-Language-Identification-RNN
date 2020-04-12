@@ -3,18 +3,25 @@ from config import config
 import numpy as np
 import matplotlib.pyplot as plt
 
-def get_data(size=None, batch_size=32, shuffle=True):
-    with h5py.File(config['dataset_original_balanced'], 'r') as hf:
-        X_train = hf['X_train'][:]
-        y_train = hf['y_train'][:]#.astype('int32')
+def get_data(size=None, batch_size=32, shuffle=True, valid=False):
+    with h5py.File(config['dataset'], 'r') as hf:
+        if valid == False:
+            X_train = hf['X_train'][:]
+            y_train = hf['y_train'][:]#.astype('int32')
+        else:
+            X_train = np.zeros((1,))
+            y_train = np.zeros((1,))
         X_val = hf['X_val'][:]
         y_val = hf['y_val'][:]#.astype('int32')
-    np.random.seed(321)
+    #np.random.seed(321)
     if shuffle == True:
         perm = np.random.permutation(y_train.shape[0])
+        #print(perm)
         X_train = X_train[perm]
         y_train = y_train[perm]
         perm = np.random.permutation(y_val.shape[0])
+        #print(perm)
+        #assert 0
         X_val = X_val[perm]
         y_val = y_val[perm]
     if size is not None:
