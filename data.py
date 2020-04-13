@@ -16,12 +16,9 @@ def get_data(size=None, batch_size=32, shuffle=True, valid=False):
     #np.random.seed(321)
     if shuffle == True:
         perm = np.random.permutation(y_train.shape[0])
-        #print(perm)
         X_train = X_train[perm]
         y_train = y_train[perm]
         perm = np.random.permutation(y_val.shape[0])
-        #print(perm)
-        #assert 0
         X_val = X_val[perm]
         y_val = y_val[perm]
     if size is not None:
@@ -29,8 +26,6 @@ def get_data(size=None, batch_size=32, shuffle=True, valid=False):
         y_train = y_train[:size]
         X_val = X_val[:int(0.2 * size / 0.8)]
         y_val = y_val[:int(0.2 * size / 0.8)]
-#     y_train = np.where(y_train == -1, 3, y_train)
-#     y_val = np.where(y_val == -1, 3, y_val)
     plt.figure()
     plt.title('category distribution')
     plt.xlabel('class')
@@ -39,10 +34,4 @@ def get_data(size=None, batch_size=32, shuffle=True, valid=False):
     plt.hist(y_val.reshape((-1, 1)), alpha=0.5, label='y_val')
     plt.legend()
     plt.savefig('category_distribution.png')
-    #print(X_train.shape)
-    #assert 0
-#     X_train = X_train.reshape((batch_size, -1, 600, 64))
-#     y_train = y_train.reshape((batch_size, -1, 600, 1))
-#     X_val = X_val.reshape((batch_size, -1, 600, 64))
-#     y_val = y_val.reshape((batch_size, -1, 600, 1))
     return X_train, y_train, X_val, y_val

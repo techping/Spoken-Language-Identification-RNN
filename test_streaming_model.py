@@ -9,7 +9,6 @@ import tensorflow.keras.backend as K
 import h5py
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-#tf.get_logger().setLevel('ERROR')
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
@@ -59,12 +58,11 @@ if False:
             #print(f'{s},{n}:{np.isclose(single_pred[0], seq_pred[n])}')
     print(f'neq_count: {neq_count}')
 
+# demo first 50 rows
 X_val = X_val[:50]
 
-# input random seqence length
 correct = 0
 count = 0
-ommited_silence_len = 0
 res = [np.array([]) for _ in range(X_val.shape[0])]
 for i in tqdm(range(X_val.shape[0])):
     for j in range(X_val.shape[1]):
@@ -72,7 +70,6 @@ for i in tqdm(range(X_val.shape[0])):
             continue # omit silence signals
         count += 1
         X = X_val[i][j].reshape((1, 1, feature_dim))
-        #y = y_val[i][j].reshape((1, 1, 1))
         #pred = streaming_model.predict(X, use_multiprocessing=True, verbose=)
         pred = streaming_model(X)
         if res[i].size == 0:
@@ -81,11 +78,7 @@ for i in tqdm(range(X_val.shape[0])):
             res[i] = np.vstack((res[i], pred[0].numpy()))
         if tf.argmax(pred[0][0]).numpy() == int(y_val[i][j][0]):
             correct += 1
-        #acc = streaming_model.evaluate(x=X, y=y, verbose=0, use_multiprocessing=True)[1]
         K.clear_session()
-    #print(correct / count)
-    #print(res[i].shape)
-    #print(f'Sequence {i+1} acc: {sub_correct / sub_ommited_silence_len}')
     streaming_model.reset_states()
 print(f'Total streaming accuracy on validation set: {correct / count}')
 

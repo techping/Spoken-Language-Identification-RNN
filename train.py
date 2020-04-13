@@ -5,14 +5,6 @@ import tensorflow as tf
 from sklearn.utils import class_weight
 import numpy as np
 
-# from tensorflow.keras import backend as K
-# 
-# config = tf.compat.v1.ConfigProto()
-# config.gpu_options.allow_growth = True
-# sess = tf.compat.v1.Session(config=config)
-# tf.compat.v1.keras.backend.set_session(sess)
-# 
-# print('test')
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
@@ -29,7 +21,6 @@ if config['resume'] == True:
     model.load_weights(config['checkpoint'])
 print('model done')
 
-# model.evaluate(x=X_val, y=y_val, batch_size=config['batch_size'], use_multiprocessing=True)
 try:
     model.fit(#x=X_val, y=y_val,
             x=X_train, y=y_train, 
