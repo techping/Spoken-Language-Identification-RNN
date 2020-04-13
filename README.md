@@ -1,36 +1,17 @@
-# EE599-HW5-LID
+# Spoken-Language-Identification-RNN
 
-#### Description
-{**When you're done, you can delete the content in this README and update the file with details for others getting started with your repository**}
+## Objective
+Spoken  Language  Identification  (LID)  is  broadly  defined  as  recognizing  the  language  of  a  given speech utterance.  It has numerous applications in automated language and speech recognition,multilingual machine translations,  speech-to-speech translations,  and emergency call routing.  Inthis  homework,  we  will  try  to  classify  three  languages  (English,  Hindi  and  Mandarin)  from  the spoken utterances that have been crowd-sourced from the class.
 
-#### Software Architecture
-Software architecture description
+## Method
 
-#### Installation
+```Python
+mapping = {'english': 0, 'hindi': 1, ' mandarin': 2}
+```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+Extract MFCC features from audio files, build up Recurrent Neural Network (GRU/LSTM) to train the model to output 3-class probability.
 
-#### Instructions
+### Duel with silence
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+Mark silence audios with label -1, and omit them both in loss and accuracy measurement.
 
-#### Contribution
-
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
-
-
-#### Gitee Feature
-
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
