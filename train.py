@@ -18,7 +18,7 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 X_train, y_train, X_val, y_val = get_data(size=None if config['debug'] is not True else config['debug_size'], batch_size=config['batch_size'])
-class_weights = class_weight.compute_class_weight('balanced', np.unique(y_train.reshape((-1,))), y_train.reshape((-1,)))[1:]
+class_weights = class_weight.compute_class_weight('balanced', np.unique(y_train[y_train!=-1].reshape((-1,))), y_train[y_train!=-1].reshape((-1,)))
 #class_weights = [0.51206135, 1.7253448, 0.72872305]
 print(class_weights)
 print('data done')
