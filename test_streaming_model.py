@@ -60,28 +60,42 @@ if False:
 
 # input random seqence length
 correct = 0
+count = 0
 ommited_silence_len = 0
+res = [np.array([]) for _ in range(X_val.shape[0])]
 for i in tqdm(range(X_val.shape[0])):
-    count = 0
-    sub_correct = 0
-    sub_ommited_silence_len = 0
-    while count < train_seq_length:
-        N = np.random.randint(300, 1000) # randomly generate sequence length
-        if N + count > train_seq_length:
-            N = train_seq_length - count
-        X = X_val[i][count:count + N].reshape((1, -1, feature_dim))
-        y = y_val[i][count:count + N].reshape((1, -1, 1))
+    for j in range(X_val.shape[1]):
+        if int(y_val[i][j][0]) == -1:
+            continue # omit silence signals
+        count += 1
+        X = X_val[i][j].reshape((1, 1, feature_dim))
+        #y = y_val[i][j].reshape((1, 1, 1))
         #pred = streaming_model.predict(X, use_multiprocessing=True, verbose=)
         pred = streaming_model(X)
-        cor = tf.reduce_sum(my_sparse_categorical_accuracy(y, pred))
-        sub_ommited_silence_len += np.sum(tf.not_equal(tf.cast(y, tf.int32), -1 * tf.ones((1,), dtype=tf.int32)).numpy().reshape((-1)))
-        #print(f'acc: {cor / N}')
+        if res[i].size == 0:
+            res[i] = pred[0].numpy()
+        else:
+            res[i] = np.vstack((res[i], pred[0].numpy()))
+        if tf.argmax(pred[0][0]).numpy() == int(y_val[i][j][0]):
+            correct += 1
         #acc = streaming_model.evaluate(x=X, y=y, verbose=0, use_multiprocessing=True)[1]
-        sub_correct += cor#int(acc * N)
-        count += N
         K.clear_session()
-    correct += sub_correct
-    ommited_silence_len += sub_ommited_silence_len
+    #print(correct / count)
+    #print(res[i].shape)
     #print(f'Sequence {i+1} acc: {sub_correct / sub_ommited_silence_len}')
     streaming_model.reset_states()
-print(f'Total streaming accuracy on validation set: {correct / ommited_silence_len}')
+print(f'Total streaming accuracy on validation set: {correct / count}')
+
+import matplotlib.pyplot as plt
+
+# randomly sample 10 files to plot their output over time
+N = np.random.randint(X_val.shape[0], size=10)
+for i in range(10):
+    plt.figure()
+    plt.title(f'output over time-{N[i]}')
+    plt.xlabel('time')
+    plt.ylabel('probability')
+    for j in range(3):
+        plt.plot([k for k in range(res[N[i]].shape[0])], res[N[i]].T[i], label=f'prob-{j}')
+    plt.legend()
+    plt.savefig(f'output-{N[i]}.png')
