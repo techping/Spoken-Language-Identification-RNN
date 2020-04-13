@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy as np
 import os
 import tensorflow.keras.backend as K
+import h5py
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 #tf.get_logger().setLevel('ERROR')
@@ -58,6 +59,8 @@ if False:
             #print(f'{s},{n}:{np.isclose(single_pred[0], seq_pred[n])}')
     print(f'neq_count: {neq_count}')
 
+X_val = X_val[:50]
+
 # input random seqence length
 correct = 0
 count = 0
@@ -90,12 +93,19 @@ import matplotlib.pyplot as plt
 
 # randomly sample 10 files to plot their output over time
 N = np.random.randint(X_val.shape[0], size=10)
+print(N)
 for i in range(10):
     plt.figure()
     plt.title(f'output over time-{N[i]}')
     plt.xlabel('time')
     plt.ylabel('probability')
     for j in range(3):
-        plt.plot([k for k in range(res[N[i]].shape[0])], res[N[i]].T[i], label=f'prob-{j}')
+        try:
+            plt.plot([k for k in range(res[N[i]].shape[0])], res[N[i]].T[j], label=f'prob-{j}')
+        except:
+            pass
     plt.legend()
     plt.savefig(f'output-{N[i]}.png')
+
+with h5py.File('res.hdf5', 'w') as hf:
+    hf.create_dataset('res', data=np.array(res))
