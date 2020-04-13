@@ -15,3 +15,9 @@ Extract MFCC features from audio files, build up Recurrent Neural Network (GRU/L
 
 Mark silence audios with label -1, and omit them both in loss and accuracy measurement.
 
+## Performance
+
+After training from scratch and dueling with overfitting, my model performed ~90% validation accuracy.
+
+![Learning Curve](learning_curves.png)
+
